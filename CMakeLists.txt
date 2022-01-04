@@ -21,5 +21,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_compile_options(${PROJECT_NAME} PUBLIC ${SPDLOG_CFLAGS})
 target_link_libraries(${PROJECT_NAME}
     ${WS_LDFLAGS}
-    ${GLIB_LIBRARIES}
-    ${SPDLOG_LIBRARIES})
+    ${GLIB_LDFLAGS}
+    ${SPDLOG_LDFLAGS})
