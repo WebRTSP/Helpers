@@ -41,6 +41,8 @@ void InitLwsLogger(spdlog::level::level_enum level)
         case spdlog::level::off:
             lwsLogLevel = 0;
             break;
+        case spdlog::level::n_levels:
+            break;
     }
 
     lws_set_log_level(lwsLogLevel, LwsLog);
