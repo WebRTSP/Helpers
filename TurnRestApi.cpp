@@ -6,15 +6,15 @@
 #include <vector>
 
 std::string TurnTemporaryUsername(
-    const std::string& temporaryUsername,
-    unsigned passwordTTL)
+    const std::string& username,
+    std::chrono::seconds passwordTTL)
 {
     const time_t now = time(nullptr);
 
-    if(temporaryUsername.empty())
-        return std::to_string(now + passwordTTL) + ":" + temporaryUsername;
+    if(username.empty())
+        return std::to_string(now + passwordTTL.count());
     else
-        return std::to_string(now + passwordTTL) + ":" + temporaryUsername;
+        return std::to_string(now + passwordTTL.count()) + ":" + username;
 }
 
 std::string TurnTemporaryPassword(
@@ -44,35 +44,29 @@ std::string TurnTemporaryPassword(
 
         g_hmac_unref(hmac);
 
-        gchar* base64 = g_base64_encode(digest.data(), digest.size());
-        const std::string result(base64);
-        g_free(base64);
+        g_autofree gchar* base64 = g_base64_encode(digest.data(), digest.size());
 
-        return result;
+        return base64;
     }
 
     return std::string();
 }
 
-std::string IceServer(
+std::string GenerateIceServerUrl(
     const std::string& username,
-    unsigned passwordTTL,
+    std::chrono::seconds passwordTTL,
     const std::string& staticAuthSecret,
-    const std::string& iceEndpoint)
+    const std::string& protocol,
+    const std::string& endpoint)
 {
-    const std::string userName =
+    const std::string temporaryUsernazme =
         TurnTemporaryUsername(username, passwordTTL);
 
     const std::string password =
-        TurnTemporaryPassword(userName, staticAuthSecret);
+        TurnTemporaryPassword(temporaryUsernazme, staticAuthSecret);
 
-    char* escapedUserName = g_uri_escape_string(userName.c_str(), nullptr, false);
-    std::string escapedUserName2 = escapedUserName;
-    g_free(escapedUserName);
+    g_autofree gchar* escapedUserName = g_uri_escape_string(temporaryUsernazme.c_str(), nullptr, false);
+    g_autofree gchar* escapedPassword = g_uri_escape_string(password.c_str(), nullptr, false);
 
-    char* escapedPassword = g_uri_escape_string(password.c_str(), nullptr, false);
-    std::string escapedPassword2 = escapedPassword;
-    g_free(escapedPassword);
-
-    return escapedUserName2 + ":" + escapedPassword2 + "@" + iceEndpoint;
+    return protocol + escapedUserName + ":" + escapedPassword + "@" + endpoint;
 }
