@@ -38,7 +38,7 @@ std::string TurnTemporaryPassword(
             temporaryUsername.size());
 
         std::vector<guint8> digest(digestSize);
-        gsize digestLen;
+        gsize digestLen = digest.size();
         g_hmac_get_digest(hmac, digest.data(), &digestLen);
         assert(digestLen == static_cast<gsize>(digestSize));
 
