@@ -40,7 +40,7 @@ std::string TurnTemporaryPassword(
         std::vector<guint8> digest(digestSize);
         gsize digestLen = digest.size();
         g_hmac_get_digest(hmac, digest.data(), &digestLen);
-        assert(digestLen == static_cast<gsize>(digestSize));
+        assert(digestLen == static_cast<const gsize>(digestSize));
 
         g_hmac_unref(hmac);
 
