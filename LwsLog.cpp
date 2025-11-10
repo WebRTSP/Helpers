@@ -14,9 +14,12 @@ static void LwsLog(int level, const char* line);
 
 void InitLwsLogger(spdlog::level::level_enum level)
 {
-    spdlog::sink_ptr sink = std::make_shared<spdlog::sinks::stdout_sink_st>();
-
-    Logger = std::make_shared<spdlog::logger>("libwebsockets", sink);
+    if(!Logger) {
+        Logger = spdlog::stdout_logger_st("libwebsockets");
+#ifdef SNAPCRAFT_BUILD
+        Logger->set_pattern("[%n] [%l] %v");
+#endif
+    }
 
     Logger->set_level(level);
 
@@ -121,10 +124,10 @@ static void LwsLog(int level, const char* line)
 static inline const std::shared_ptr<spdlog::logger>& LwsLog()
 {
     if(!Logger) {
-#ifndef NDEBUG
-        InitLwsLogger(spdlog::level::debug);
-#else
+#ifdef NDEBUG
         InitLwsLogger(spdlog::level::info);
+#else
+        InitLwsLogger(spdlog::level::debug);
 #endif
     }
 
