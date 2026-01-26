@@ -15,6 +15,7 @@ public:
 
     typedef std::function<void ()> Action;
     void postAction(const Action&);
+    void postAction(Action&&);
 
 private:
     struct Private;

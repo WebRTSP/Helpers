@@ -114,3 +114,11 @@ void Actor::postAction(const Action& action)
         new ::Action { action });
     _p->notifier.postEvent();
 }
+
+void Actor::postAction(Action&& action)
+{
+    g_async_queue_push(
+        _p->queuePtr.get(),
+        new ::Action { std::move(action) });
+    _p->notifier.postEvent();
+}
