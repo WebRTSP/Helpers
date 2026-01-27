@@ -58,8 +58,6 @@ void ActorMain(
 struct Actor::Private {
     Private();
 
-    void postQuit();
-
     GMainContextPtr mainContextPtr;
     GMainLoopPtr mainLoopPtr;
     GAsyncQueuePtr queuePtr;
@@ -81,19 +79,6 @@ Actor::Private::Private() :
 {
 }
 
-void Actor::Private::postQuit()
-{
-    GMainLoop* loop = mainLoopPtr.get();
-
-    g_async_queue_push(
-        queuePtr.get(),
-        new Action {
-            [loop] () {
-                g_main_loop_quit(loop);
-            }
-        });
-}
-
 Actor::Actor() :
     _p(std::make_unique<Private>())
 {
@@ -102,7 +87,9 @@ Actor::Actor() :
 Actor::~Actor()
 {
     if(_p->actorThread.joinable()) {
-        _p->postQuit();
+        postAction([loop = _p->mainLoopPtr.get()] () {
+            g_main_loop_quit(loop);
+        });
         _p->actorThread.join();
     }
 }
