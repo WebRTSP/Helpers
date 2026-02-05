@@ -7,9 +7,20 @@ option(LIBWEBSOCKETS_SUPPORT "libwebsockets support" ON)
 find_package(PkgConfig REQUIRED)
 
 pkg_search_module(GLIB REQUIRED glib-2.0)
-pkg_search_module(SPDLOG REQUIRED spdlog)
 if(LIBWEBSOCKETS_SUPPORT)
     pkg_search_module(LIBWEBSOCKETS REQUIRED libwebsockets)
+endif()
+if(ANDROID)
+    include(FetchContent)
+
+    FetchContent_Declare(
+            spdlog
+            GIT_REPOSITORY https://github.com/gabime/spdlog.git
+            GIT_TAG v1.17.0
+    )
+    FetchContent_MakeAvailable(spdlog)
+else()
+    pkg_search_module(SPDLOG REQUIRED spdlog)
 endif()
 
 set(SOURCES
@@ -39,15 +50,9 @@ add_library(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         ${GLIB_INCLUDE_DIRS}
-        ${SPDLOG_INCLUDE_DIRS}
-)
-target_compile_options(${PROJECT_NAME}
-    PUBLIC
-        ${SPDLOG_CFLAGS}
 )
 target_link_libraries(${PROJECT_NAME}
     ${GLIB_LDFLAGS}
-    ${SPDLOG_LDFLAGS}
 )
 
 if(LIBWEBSOCKETS_SUPPORT)
@@ -57,5 +62,23 @@ if(LIBWEBSOCKETS_SUPPORT)
     )
     target_link_libraries(${PROJECT_NAME}
         ${LIBWEBSOCKETS_LDFLAGS}
+    )
+endif()
+
+if(ANDROID)
+    target_link_libraries(${PROJECT_NAME}
+        spdlog::spdlog
+    )
+else()
+    target_include_directories(${PROJECT_NAME}
+        PUBLIC
+            ${SPDLOG_INCLUDE_DIRS}
+    )
+    target_compile_options(${PROJECT_NAME}
+        PUBLIC
+            ${SPDLOG_CFLAGS}
+    )
+    target_link_libraries(${PROJECT_NAME}
+        ${SPDLOG_LDFLAGS}
     )
 endif()
