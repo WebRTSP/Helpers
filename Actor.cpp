@@ -1,6 +1,8 @@
 #include "Actor.h"
 
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include "EventSource.h"
 
@@ -108,4 +110,27 @@ void Actor::postAction(Action&& action)
         _p->queuePtr.get(),
         new ::Action { std::move(action) });
     _p->notifier.postEvent();
+}
+
+void Actor::sendAction(const Action& action)
+{
+    std::mutex guard;
+    std::condition_variable conditional;
+    bool handled = false;
+
+    std::unique_lock guardLock(guard);
+
+    g_async_queue_push(
+        _p->queuePtr.get(),
+        new ::Action {
+            [&guard, &conditional, &action, &handled] () {
+                std::unique_lock guardLock(guard);
+                action();
+                handled = true;
+                conditional.notify_one();
+            }
+        });
+    _p->notifier.postEvent();
+
+    conditional.wait(guardLock, [&handled] () { return handled; });
 }
