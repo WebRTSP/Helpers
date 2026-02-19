@@ -32,6 +32,8 @@ set(SOURCES
     ConfigHelpers.cpp
     TurnRestApi.h
     TurnRestApi.cpp
+    EventSource2.h
+    EventSource2.cpp
 )
 
 if(LIBWEBSOCKETS_SUPPORT)
