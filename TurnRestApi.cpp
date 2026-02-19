@@ -44,9 +44,11 @@ std::string TurnTemporaryPassword(
 
         g_hmac_unref(hmac);
 
-        g_autofree gchar* base64 = g_base64_encode(digest.data(), digest.size());
+        gchar* base64 = g_base64_encode(digest.data(), digest.size());
+        std::string result = base64;
+        g_free(base64);
 
-        return base64;
+        return result;
     }
 
     return std::string();
@@ -65,8 +67,13 @@ std::string GenerateIceServerUrl(
     const std::string password =
         TurnTemporaryPassword(temporaryUsername, staticAuthSecret);
 
-    g_autofree gchar* escapedUserName = g_uri_escape_string(temporaryUsername.c_str(), nullptr, false);
-    g_autofree gchar* escapedPassword = g_uri_escape_string(password.c_str(), nullptr, false);
+    gchar* escapedUserName = g_uri_escape_string(temporaryUsername.c_str(), nullptr, false);
+    gchar* escapedPassword = g_uri_escape_string(password.c_str(), nullptr, false);
 
-    return protocol + escapedUserName + ":" + escapedPassword + "@" + endpoint;
+    std::string result = protocol + escapedUserName + ":" + escapedPassword + "@" + endpoint;
+
+    g_free(escapedUserName);
+    g_free(escapedPassword);
+
+    return result;
 }
