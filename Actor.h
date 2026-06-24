@@ -4,7 +4,7 @@
 #include <functional>
 
 
-class Actor {
+class Actor final {
 public:
     Actor() noexcept;
     Actor(Actor&) = delete;
