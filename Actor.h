@@ -6,7 +6,9 @@
 
 class Actor final {
 public:
-    Actor() noexcept;
+    struct Context;
+
+    Actor(const std::shared_ptr<Context>& = {}) noexcept;
     Actor(Actor&) = delete;
     Actor& operator = (Actor&) = delete;
     ~Actor() noexcept;
@@ -19,4 +21,10 @@ public:
 private:
     struct Private;
     std::unique_ptr<Private> _p;
+};
+
+struct Actor::Context {
+    virtual ~Context() noexcept = default;
+    virtual void activate() noexcept {}
+    virtual void deactivate() noexcept {}
 };
