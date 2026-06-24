@@ -10,13 +10,13 @@ class Actor {
     Actor& operator = (Actor&) = delete;
 
 public:
-    Actor();
-    ~Actor();
+    Actor() noexcept;
+    ~Actor() noexcept;
 
     typedef std::function<void ()> Action;
-    void postAction(const Action&);
-    void postAction(Action&&);
-    void sendAction(const Action&);
+    void postAction(const Action&) noexcept;
+    void postAction(Action&&) noexcept;
+    void sendAction(const Action&) noexcept;
 
 private:
     struct Private;

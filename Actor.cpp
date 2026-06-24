@@ -35,7 +35,7 @@ struct Action {
     Actor::Action action;
 };
 
-void OnEvent(GAsyncQueue* queue)
+void OnEvent(GAsyncQueue* queue) noexcept
 {
     while(gpointer item = g_async_queue_try_pop(queue)) {
         std::unique_ptr<Action>(static_cast<Action*>(item))->action();
@@ -46,7 +46,7 @@ void ActorMain(
     GMainContext* mainContext,
     GMainLoop* mainLoop,
     GAsyncQueue* queue,
-    EventSource* notifier)
+    EventSource* notifier) noexcept
 {
     g_main_context_push_thread_default(mainContext);
 
@@ -58,7 +58,7 @@ void ActorMain(
 }
 
 struct Actor::Private {
-    Private();
+    Private() noexcept;
 
     GMainContextPtr mainContextPtr;
     GMainLoopPtr mainLoopPtr;
@@ -67,7 +67,7 @@ struct Actor::Private {
     std::thread actorThread;
 };
 
-Actor::Private::Private() :
+Actor::Private::Private() noexcept :
     mainContextPtr(g_main_context_new()),
     mainLoopPtr(g_main_loop_new(mainContextPtr.get(), FALSE)),
     queuePtr(g_async_queue_new()),
@@ -81,12 +81,12 @@ Actor::Private::Private() :
 {
 }
 
-Actor::Actor() :
+Actor::Actor() noexcept :
     _p(std::make_unique<Private>())
 {
 }
 
-Actor::~Actor()
+Actor::~Actor() noexcept
 {
     if(_p->actorThread.joinable()) {
         postAction([loop = _p->mainLoopPtr.get()] () {
@@ -96,7 +96,7 @@ Actor::~Actor()
     }
 }
 
-void Actor::postAction(const Action& action)
+void Actor::postAction(const Action& action) noexcept
 {
     g_async_queue_push(
         _p->queuePtr.get(),
@@ -104,7 +104,7 @@ void Actor::postAction(const Action& action)
     _p->notifier.postEvent();
 }
 
-void Actor::postAction(Action&& action)
+void Actor::postAction(Action&& action) noexcept
 {
     g_async_queue_push(
         _p->queuePtr.get(),
@@ -112,7 +112,7 @@ void Actor::postAction(Action&& action)
     _p->notifier.postEvent();
 }
 
-void Actor::sendAction(const Action& action)
+void Actor::sendAction(const Action& action) noexcept
 {
     std::mutex guard;
     std::condition_variable conditional;
