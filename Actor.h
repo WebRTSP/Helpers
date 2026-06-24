@@ -5,12 +5,10 @@
 
 
 class Actor {
-    Actor(Actor&) = delete;
-
-    Actor& operator = (Actor&) = delete;
-
 public:
     Actor() noexcept;
+    Actor(Actor&) = delete;
+    Actor& operator = (Actor&) = delete;
     ~Actor() noexcept;
 
     typedef std::function<void ()> Action;
