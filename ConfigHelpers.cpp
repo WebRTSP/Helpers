@@ -28,6 +28,19 @@ std::deque<std::string> ConfigDirs()
     return dirs;
 }
 
+std::optional<std::string> DataDir()
+{
+#ifdef SNAPCRAFT_BUILD
+    if(const gchar* common = g_getenv("SNAP_COMMON"))
+        return common;
+#else
+    if(const gchar* dataDir = g_get_user_data_dir())
+        return dataDir;
+#endif
+
+    return {};
+}
+
 std::string FullPath(const std::string& configDir, const std::string& path)
 {
     std::string fullPath;
