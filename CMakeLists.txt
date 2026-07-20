@@ -17,8 +17,35 @@ if(ANDROID OR WIN32)
         GIT_TAG v1.17.0
     )
     FetchContent_MakeAvailable(spdlog)
+
+    if(LIBWEBSOCKETS_SUPPORT)
+        if(ANDROID)
+            set(LWS_WITH_STATIC ON)
+            set(LWS_WITH_SHARED OFF)
+        endif()
+
+        set(LWS_WITH_MINIMAL_EXAMPLES OFF)
+        set(LWS_WITHOUT_TESTAPPS ON)
+        set(LWS_WITHOUT_TEST_SERVER ON)
+        set(LWS_WITHOUT_TEST_SERVER_EXTPOLL ON)
+        set(LWS_WITHOUT_TEST_PING ON)
+        set(LWS_WITHOUT_TEST_CLIENT ON)
+        set(LWS_WITHOUT_DAEMONIZE ON)
+        set(LWS_WITH_GLIB ON)
+
+        FetchContent_Declare(
+            libwebsockets
+            GIT_REPOSITORY https://github.com/warmcat/libwebsockets.git
+            GIT_TAG v4.5-stable
+        )
+        FetchContent_MakeAvailable(libwebsockets)
+    endif()
 else()
     pkg_search_module(SPDLOG REQUIRED spdlog)
+
+    if(LIBWEBSOCKETS_SUPPORT)
+        pkg_search_module(LIBWEBSOCKETS REQUIRED libwebsockets)
+    endif()
 endif()
 
 if(WIN32)
@@ -32,9 +59,6 @@ if(WIN32)
     )
 else()
     pkg_search_module(GLIB REQUIRED glib-2.0)
-    if(LIBWEBSOCKETS_SUPPORT)
-        pkg_search_module(LIBWEBSOCKETS REQUIRED libwebsockets)
-    endif()
 endif()
 
 set(SOURCES
@@ -85,13 +109,19 @@ else()
 endif()
 
 if(LIBWEBSOCKETS_SUPPORT)
-    target_include_directories(${PROJECT_NAME}
-        PUBLIC
-            ${LIBWEBSOCKETS_INCLUDE_DIRS}
-    )
-    target_link_libraries(${PROJECT_NAME}
-        ${LIBWEBSOCKETS_LDFLAGS}
-    )
+    if(ANDROID OR WIN32)
+        target_link_libraries(${PROJECT_NAME}
+            websockets
+        )
+    else()
+        target_include_directories(${PROJECT_NAME}
+            PUBLIC
+                ${LIBWEBSOCKETS_INCLUDE_DIRS}
+        )
+        target_link_libraries(${PROJECT_NAME}
+            ${LIBWEBSOCKETS_LDFLAGS}
+        )
+    endif()
 endif()
 
 if(ANDROID OR WIN32)
