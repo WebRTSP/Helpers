@@ -52,7 +52,7 @@ void ActorMain(
     g_main_context_push_thread_default(mainContext);
 
     if(context)
-        context->activate();
+        context->activate(mainContext, mainLoop);
 
     notifier->subscribe(std::bind(&OnEvent, queue));
 

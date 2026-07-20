@@ -3,6 +3,8 @@
 #include <memory>
 #include <functional>
 
+#include <glib.h>
+
 
 class Actor final {
 public:
@@ -25,6 +27,6 @@ private:
 
 struct Actor::Context {
     virtual ~Context() noexcept = default;
-    virtual void activate() noexcept {}
+    virtual void activate(GMainContext*, GMainLoop*) noexcept {}
     virtual void deactivate() noexcept {}
 };
