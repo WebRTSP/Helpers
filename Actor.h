@@ -27,6 +27,6 @@ private:
 
 struct Actor::Context {
     virtual ~Context() noexcept = default;
-    virtual void activate(GMainContext*, GMainLoop*) noexcept {}
+    virtual void activate(Actor*, GMainContext*, GMainLoop*) noexcept {}
     virtual void deactivate() noexcept {}
 };

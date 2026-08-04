@@ -43,6 +43,7 @@ void OnEvent(GAsyncQueue* queue) noexcept
 }
 
 void ActorMain(
+    Actor* owner,
     GMainContext* mainContext,
     GMainLoop* mainLoop,
     GAsyncQueue* queue,
@@ -52,7 +53,7 @@ void ActorMain(
     g_main_context_push_thread_default(mainContext);
 
     if(context)
-        context->activate(mainContext, mainLoop);
+        context->activate(owner, mainContext, mainLoop);
 
     notifier->subscribe(std::bind(&OnEvent, queue));
 
@@ -65,7 +66,7 @@ void ActorMain(
 }
 
 struct Actor::Private {
-    Private(const std::shared_ptr<Context>&) noexcept;
+    Private(Actor* owner, const std::shared_ptr<Context>&) noexcept;
 
     GMainContextPtr mainContextPtr;
     GMainLoopPtr mainLoopPtr;
@@ -74,13 +75,14 @@ struct Actor::Private {
     std::thread actorThread;
 };
 
-Actor::Private::Private(const std::shared_ptr<Context>& context) noexcept :
+Actor::Private::Private(Actor* owner, const std::shared_ptr<Context>& context) noexcept :
     mainContextPtr(g_main_context_new()),
     mainLoopPtr(g_main_loop_new(mainContextPtr.get(), FALSE)),
     queuePtr(g_async_queue_new()),
     notifier(mainContextPtr.get()),
     actorThread(
         ActorMain,
+        owner,
         mainContextPtr.get(),
         mainLoopPtr.get(),
         queuePtr.get(),
@@ -90,7 +92,7 @@ Actor::Private::Private(const std::shared_ptr<Context>& context) noexcept :
 }
 
 Actor::Actor(const std::shared_ptr<Context>& context) noexcept :
-    _p(std::make_unique<Private>(context))
+    _p(std::make_unique<Private>(this, context))
 {
 }
 
