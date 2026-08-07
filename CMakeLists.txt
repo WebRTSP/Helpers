@@ -68,6 +68,8 @@ set(SOURCES
     TurnRestApi.cpp
     EventSource2.h
     EventSource2.cpp
+    SpdLog.h
+    SpdLog.cpp
 )
 
 if(NOT WIN32)
