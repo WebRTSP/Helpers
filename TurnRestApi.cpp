@@ -58,7 +58,7 @@ std::string GenerateIceServerUrl(
     const std::string& username,
     std::chrono::seconds passwordTTL,
     const std::string& staticAuthSecret,
-    const std::string& protocol,
+    std::string_view scheme,
     const std::string& endpoint)
 {
     const std::string temporaryUsername =
@@ -70,7 +70,8 @@ std::string GenerateIceServerUrl(
     gchar* escapedUserName = g_uri_escape_string(temporaryUsername.c_str(), nullptr, false);
     gchar* escapedPassword = g_uri_escape_string(password.c_str(), nullptr, false);
 
-    std::string result = protocol + escapedUserName + ":" + escapedPassword + "@" + endpoint;
+    std::string result = std::string(scheme) + "://" +
+        escapedUserName + ":" + escapedPassword + "@" + endpoint;
 
     g_free(escapedUserName);
     g_free(escapedPassword);
