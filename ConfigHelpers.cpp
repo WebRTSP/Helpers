@@ -14,15 +14,24 @@ std::deque<std::string> ConfigDirs()
     if(const gchar* common = g_getenv("SNAP_COMMON"))
         dirs.push_back(common);
 #else
+    const gchar* programName = g_get_prgname();
     const gchar * const *systemConfigDirs = g_get_system_config_dirs();
     while(*systemConfigDirs) {
-        dirs.push_back(*systemConfigDirs);
+        if(programName)
+            dirs.push_back(std::string(*systemConfigDirs) + G_DIR_SEPARATOR + programName);
+        else
+            dirs.push_back(*systemConfigDirs);
+
         ++systemConfigDirs;
     }
 
     const gchar* configDir = g_get_user_config_dir();
-    if(configDir)
-        dirs.push_back(configDir);
+    if(configDir) {
+        if(programName)
+            dirs.push_back(std::string(configDir) + G_DIR_SEPARATOR + programName);
+        else
+            dirs.push_back(configDir);
+    }
 #endif
 
     return dirs;
@@ -34,8 +43,13 @@ std::optional<std::string> DataDir()
     if(const gchar* common = g_getenv("SNAP_COMMON"))
         return common;
 #else
-    if(const gchar* dataDir = g_get_user_data_dir())
-        return dataDir;
+    const gchar* programName = g_get_prgname();
+    if(const gchar* dataDir = g_get_user_data_dir()) {
+        if(programName)
+            return std::string(dataDir) + G_DIR_SEPARATOR + programName;
+        else
+            return dataDir;
+    }
 #endif
 
     return {};
