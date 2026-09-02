@@ -54,12 +54,12 @@ std::string TurnTemporaryPassword(
     return std::string();
 }
 
-std::string GenerateIceServerUrl(
+std::string GenerateTURNServerUrl(
     const std::string& username,
     std::chrono::seconds passwordTTL,
     const std::string& staticAuthSecret,
-    std::string_view scheme,
-    const std::string& endpoint)
+    const std::string& endpoint,
+    bool secure)
 {
     const std::string temporaryUsername =
         TurnTemporaryUsername(username, passwordTTL);
@@ -70,7 +70,8 @@ std::string GenerateIceServerUrl(
     gchar* escapedUserName = g_uri_escape_string(temporaryUsername.c_str(), nullptr, false);
     gchar* escapedPassword = g_uri_escape_string(password.c_str(), nullptr, false);
 
-    std::string result = std::string(scheme) + "://" +
+    std::string result =
+        std::string(secure ? "turns://" : "turn://") +
         escapedUserName + ":" + escapedPassword + "@" + endpoint;
 
     g_free(escapedUserName);
